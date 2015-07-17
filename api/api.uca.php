@@ -19,6 +19,28 @@ class UCA_connect extends dbconnect{
 		return $results;
 	}
 
+	function selectquery($sql,$params){
+		$stmt = $this->conn->prepare($sql);
+		// to a dynamic number of parameters into bind_param
+		call_user_func_array(array($stmt,"bind_param"),$this->ref_values($params));
+		$stmt->execute();
+
+		$results = array();
+		$res = $stmt->get_result();
+		while($r = $res->fetch_assoc()){
+			$results[] = $r;
+		}
+		$stmt->close();
+		return $results;
+	}
+
+	private function ref_values($array) {
+		//helps satisfies the condition that bind_param expects a referenced object
+		$refs = array();
+		foreach ($array as $key => $value) {
+			$refs[$key] = &$array[$key]; 
+		}
+		return $refs; 
 	}
 
 	function get_city_list(){
@@ -36,8 +58,8 @@ class UCA_connect extends dbconnect{
 	//get the student counts for all years for specified high school and university
 	function get_count_year_by_school_univ_data($s_school_name, $s_city_name, $s_univ_name){
 		$a_data = array();
-		$sql = "SELECT year,applicants,admits,enrollees FROM school_data WHERE school_name = '$s_school_name' AND city_name = '$s_city_name' AND univ_name = '$s_univ_name' ORDER BY year ASC;";
-		$res = $this->dbquery($sql);
+		$sql = "SELECT year,applicants,admits,enrollees FROM school_data WHERE school_name = ? AND city_name = ? AND univ_name = ? ORDER BY year ASC;";
+		$res = $this->selectquery($sql,array('sss',$s_school_name, $s_city_name, $s_univ_name));
 		foreach($res as $r){
 			//sort results into array
 			$a_data[] = [
@@ -66,6 +88,10 @@ class UCA_connect extends dbconnect{
 		};
 		return json_encode($a_data);	//encode the data into json for transfer
 	}
+}
+
+function checkCleanString($string){
+	return preg_match('/^[A-Za-z\s\']*$/',$string) === 1;
 }
 
 if(!isset($_GET['query_type']))
