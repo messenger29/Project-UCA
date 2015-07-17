@@ -59,21 +59,29 @@ class UCA_connect extends dbconnect{
 }
 
 if(!isset($_GET['query_type']))
-	die();
+	die(http_response_code(409));
 
 $s_query_type = $_GET['query_type'];
 if($s_query_type == 'studentcountbyschooluniv' && isset($_GET['school_name']) && isset($_GET['city_name']) && isset($_GET['univ_name'])){
 	$s_school_name = $_GET['school_name'];
 	$s_city_name = $_GET['city_name'];
 	$s_univ_name = $_GET['univ_name'];
-	if(!ctype_alnum($s_school_name) && !ctype_alnum($s_city_name) && !ctype_alnum($s_univ_name)){
-		die("school_name/city_name/univ_name not valid");
+
+	//check to make sure 
+	if(!checkCleanString($s_school_name)){
+		die(http_response_code(409)."<br>"."school_name:'$s_school_name' not alphanumeric");
+	}
+	elseif(!checkCleanString($s_city_name)){
+		die(http_response_code(409)."<br>"."city_name:'$s_city_name' not alphanumeric");
+	}
+	elseif(!checkCleanString($s_univ_name)){
+		die(http_response_code(409)."<br>"."univ_name:'$s_univ_name' not alphanumeric");
 	}
 
 	$dbconn = new UCA_connect();
 	print($dbconn->get_count_year_by_school_univ_data($s_school_name,$s_city_name,$s_univ_name));
 }
 else{
-	die('query_type not valid');
+	die(http_response_code(409)."<br>".'query_type not valid');
 }
 ?>
