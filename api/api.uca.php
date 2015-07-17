@@ -1,4 +1,7 @@
 <?php
+error_reporting(-1);
+ini_set('display_errors', 'On');
+
 require('class.dbconnect.php');
 
 class UCA_connect extends dbconnect{
