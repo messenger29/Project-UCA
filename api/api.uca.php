@@ -11,7 +11,14 @@ class UCA_connect extends dbconnect{
 	}
 
 	function dbquery($sql){
-		return $this->conn->query($sql);
+		$results = array();
+		$res = $this->conn->query($sql);
+		while($r = $res->fetch_assoc()){
+			$results[] = $r;
+		}
+		return $results;
+	}
+
 	}
 
 	function get_city_list(){
@@ -31,10 +38,10 @@ class UCA_connect extends dbconnect{
 		$a_data = array();
 		$sql = "SELECT year,applicants,admits,enrollees FROM school_data WHERE school_name = '$s_school_name' AND city_name = '$s_city_name' AND univ_name = '$s_univ_name' ORDER BY year ASC;";
 		$res = $this->dbquery($sql);
-		while($r = $res->fetch_assoc()){
+		foreach($res as $r){
 			//sort results into array
 			$a_data[] = [
-				'year'=>$r[year],
+				'year'=>$r['year'],
 				'applicants'=>$r['applicants'],
 				'admits'=>$r['admits'],
 				'enrollees'=>$r['enrollees']
